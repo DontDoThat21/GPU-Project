@@ -7,9 +7,13 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace GPUScalper
-{
+{    
+
     internal class BestBuyScalper
     {
+        public string passedEmailAddressForNewCartNotifications = "";
+        public string passedEmailPassForNewCartNotifications = "";
+
         public IWebDriver driver;// = new ChromeDriver();
         public async Task GetGpu()
         {
@@ -49,6 +53,8 @@ namespace GPUScalper
             // a good idea would be to get the screenshot of the opage before clicking trhe button? or actually probably best to click cart?
 
             EmailSender em = new EmailSender();
+            em.passedSenderEmailAddressForNewCartNotifications = passedEmailAddressForNewCartNotifications;
+            em.passedSenderEmailPassForNewCartNotifications = passedEmailPassForNewCartNotifications;
             em.SendGPUAlertEmail("https://www.bestbuy.com/site/gigabyte-nvidia-geforce-rtx-3080-eagle-oc-10gb-gddr6x-pci-express-4-0-graphics-card/6430621.p?skuId=6430621");
 
             //tempBestBuyBotsRemainingToDelegate -= 1;

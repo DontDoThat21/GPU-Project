@@ -3,11 +3,31 @@ using GPUScalper;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
-StartScalper();
+StartScalper(args);
 
-static async void StartScalper()
-{
+static async void StartScalper(string[] args)
+{    
+
+    string emailAddressForNewCartNotifications = "bobthegpuscalpiungbuilder@yandex.com";
+    string emailPassForNewCartNotifications = "PASSEDINFROMPROG-CMD-ARGS";
+    //int userSetBotCount = 0; start using this asap // "PASSEDINFROMPROG-CMD-ARGS";
+
     Console.WriteLine("-- WELCOME TO THE SCALPER -- ");
+    if (args.Length > 0) // if user puts in a cmd arg, the first is the user, the second is the pass, the third will be the bot count
+    {
+        emailAddressForNewCartNotifications = args[0];
+        emailPassForNewCartNotifications = args[1];
+
+    }
+    Console.WriteLine($"Email being used: {emailAddressForNewCartNotifications}.");
+    Console.WriteLine($"Pass being used: {emailPassForNewCartNotifications}.");
+
+    Console.WriteLine("-- Starting in 3 -- ");
+    Thread.Sleep(1000);
+    Console.WriteLine("-- Starting in 2 -- ");
+    Thread.Sleep(1000);
+    Console.WriteLine("-- Starting in 1 -- ");
+    Thread.Sleep(1000); 
 
     List<string> bestBuyLinks = new List<string>();
     List<string> bnhLinks = new List<string>();
@@ -59,6 +79,8 @@ static async void StartScalper()
         {
             // do the gpu scalp thing.
             BestBuyScalper bestBuy = new BestBuyScalper();
+            bestBuy.passedEmailAddressForNewCartNotifications = emailAddressForNewCartNotifications;
+            bestBuy.passedEmailPassForNewCartNotifications = emailPassForNewCartNotifications;
             bestBuy.driver = new ChromeDriver();
             try
             {
@@ -134,7 +156,7 @@ static async void StartScalper()
         bbScalpers[i].driver.Dispose();
     }
     bbScalpers = new List<BestBuyScalper>();
-    StartScalper();
+    StartScalper(args);
     //await Task.WhenAll(tasks);
     //string x = "buttajeg!";
 

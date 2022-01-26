@@ -10,6 +10,9 @@ namespace GPUScalper
 {
     internal class EmailSender
     {
+        public string passedSenderEmailAddressForNewCartNotifications = "";
+        public string passedSenderEmailPassForNewCartNotifications = "";
+
         public void SendGPUAlertEmail(string url)
         {
             try
@@ -25,7 +28,7 @@ namespace GPUScalper
                 smtp.Host = "smtp.gmail.com"; //for gmail host  
                 smtp.EnableSsl = true;
                 smtp.UseDefaultCredentials = false;
-                smtp.Credentials = new NetworkCredential("tylortrub@gmail.com", "4QxG84TgGieLa4");
+                smtp.Credentials = new NetworkCredential(passedSenderEmailAddressForNewCartNotifications, passedSenderEmailPassForNewCartNotifications);
                 smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
                 smtp.Send(message);
             }
