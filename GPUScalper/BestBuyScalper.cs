@@ -11,10 +11,11 @@ namespace GPUScalper
 
     internal class BestBuyScalper
     {
-        public string passedEmailAddressForNewCartNotifications = "";
-        public string passedEmailPassForNewCartNotifications = "";
+        public volatile string passedEmailAddressForNewCartNotifications = "";
+        public volatile string passedEmailPassForNewCartNotifications = "";
 
-        public IWebDriver driver;// = new ChromeDriver();
+        public volatile IWebDriver driver;// = new ChromeDriver();
+
         public async Task GetGpu()
         {
             Thread.Sleep(1000);
@@ -35,7 +36,7 @@ namespace GPUScalper
                 catch (Exception)
                 {
                     this.driver.Navigate().GoToUrl(this.driver.Url);
-                    GetGpu();
+                    await GetGpu();
                 }
 
             }

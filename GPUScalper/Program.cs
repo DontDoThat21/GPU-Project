@@ -3,13 +3,26 @@ using GPUScalper;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
-StartScalper(args);
+List<string> bestBuyLinks;
+List<string> bnhLinks;
+List<string> neweggLinks;
+List<Task> tasks;
 
-static async void StartScalper(string[] args)
+int tempBestBuyBotsRemainingToDelegate;
+int bestBuyBotsPerLink;
+int bestBuyBots;
+string emailPassForNewCartNotifications;
+string emailAddressForNewCartNotifications;
+
+List<BestBuyScalper> bbScalpers;
+
+await StartScalper(args);
+
+async Task StartScalper(string[] args)
 {    
 
-    string emailAddressForNewCartNotifications = "bobthegpuscalpiungbuilder@yandex.com";
-    string emailPassForNewCartNotifications = "PASSEDINFROMPROG-CMD-ARGS";
+    emailAddressForNewCartNotifications = "bobthegpuscalpiungbuilder@yandex.com";
+    emailPassForNewCartNotifications = "PASSEDINFROMPROG-CMD-ARGS";
     //int userSetBotCount = 0; start using this asap // "PASSEDINFROMPROG-CMD-ARGS";
 
     Console.WriteLine("-- WELCOME TO THE SCALPER -- ");
@@ -29,11 +42,11 @@ static async void StartScalper(string[] args)
     Console.WriteLine("-- Starting in 1 -- ");
     Thread.Sleep(1000); 
 
-    List<string> bestBuyLinks = new List<string>();
-    List<string> bnhLinks = new List<string>();
-    List<string> neweggLinks = new List<string>();
+    bestBuyLinks = new List<string>();
+    bnhLinks = new List<string>();
+    neweggLinks = new List<string>();
 
-    List<BestBuyScalper> bbScalpers = new List<BestBuyScalper>();
+    bbScalpers = new List<BestBuyScalper>();
 
     StreamReader streamReaderBB = new StreamReader("LinksToSearch\\BestBuy1.txt");
     string dataBB = streamReaderBB.ReadToEnd();
@@ -59,98 +72,54 @@ static async void StartScalper(string[] args)
     //    neweggLinks.Add(dataNE);
     //};
 
-    int bestBuyBots = bestBuyLinks.Count; //1 per for now 50; // how many bots to run at once
+    bestBuyBots = 50;// '' bestBuyLinks.Count; //1 per for now 50; // how many bots to run at once
     //int bNhBots = 100; // how many bots to run at once
     //int neweggBots = 100; // how many bots to run at once
 
-    int bestBuyBotsPerLink = (bestBuyBots / bestBuyLinks.Count);
+    bestBuyBotsPerLink = (bestBuyBots / bestBuyLinks.Count);
     //int bNhBotsPerLink = (bestBuyBots / bestBuyLinks.Count);
     //int neweggBotsPerLink = (bestBuyBots / bestBuyLinks.Count);
 
-    int tempBestBuyBotsRemainingToDelegate = (bestBuyBots / bestBuyLinks.Count);
+    tempBestBuyBotsRemainingToDelegate = (bestBuyBots / bestBuyLinks.Count);
     //int tempBnHBotsRemainingToDelegate = (bNhBots / bnhLinks.Count);
     //int tempNeweggBotsRemainingToDelegate = (neweggBots / neweggLinks.Count);
-    List<Task> tasks = new List<Task>();
+    tasks = new List<Task>();
 
     // these loops are going to make X bots, (i < X), then spin up (unfortunately linearly) and altuomatically select the link based off of BOT COUNT / linkCount
-    for (int i = 0; i < (bestBuyLinks.Count - 1); i++)
+    for (int i = 0; i <= (bestBuyLinks.Count - 1); i++)
     {
-        while (tempBestBuyBotsRemainingToDelegate > 0)
+        await DoTheGPUThing(i);
+        // do the gpu scalp thing.
+        BestBuyScalper bestBuy = new BestBuyScalper();
+        bestBuy.passedEmailAddressForNewCartNotifications = emailAddressForNewCartNotifications;
+        bestBuy.passedEmailPassForNewCartNotifications = emailPassForNewCartNotifications;
+        bestBuy.driver = new ChromeDriver();
+        try
         {
-            // do the gpu scalp thing.
-            BestBuyScalper bestBuy = new BestBuyScalper();
-            bestBuy.passedEmailAddressForNewCartNotifications = emailAddressForNewCartNotifications;
-            bestBuy.passedEmailPassForNewCartNotifications = emailPassForNewCartNotifications;
-            bestBuy.driver = new ChromeDriver();
+            bestBuy.driver.Navigate().GoToUrl(bestBuyLinks[i]);
+        }
+        catch (Exception)
+        {
+            Thread.Sleep(3500);
+            // im having really annyoing DNS_PROBE_FINISHED_NXDOMAIN issues so i am just going to let it try again. remove this for ur machine most likely fine for u.
             try
             {
                 bestBuy.driver.Navigate().GoToUrl(bestBuyLinks[i]);
+
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Thread.Sleep(3500);
-                // im having really annyoing DNS_PROBE_FINISHED_NXDOMAIN issues so i am just going to let it try again. remove this for ur machine most likely fine for u.
-                try
-                {
-                    bestBuy.driver.Navigate().GoToUrl(bestBuyLinks[i]);
-
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
+                throw ex;
             }
-            bbScalpers.Add(bestBuy);
-            tasks.Add(Task.Run(() => bestBuy.GetGpu()));
-            string test = "test";
-            //await Task.Run(() => bestBuy.dostuff());
-            //int x = 12;
-            //await bestBuy.dostuff();
-            //Thread.Sleep(1000);
-
-            //bbScalpers.Add(bestBuy);            
-
-            //try
-            //{
-            //    bestBuy.driver.FindElement(By.CssSelector(".c-button.c-button-primary.c-button-lg.c-button-block.c-button-icon.c-button-icon-leading.add-to-cart-button")).Click();
-
-            //}
-            //catch (Exception)
-            //{
-            //    Thread.Sleep(1000); // possible it didnt load yet; try again one more time
-            //    try
-            //    {
-            //        bestBuy.driver.FindElement(By.CssSelector(".c-button.c-button-primary.c-button-lg.c-button-block.c-button-icon.c-button-icon-leading.add-to-cart-button")).Click();
-
-            //    }
-            //    catch (Exception)
-            //    {
-            //        break;
-            //    }
-
-            //}
-
-            //try
-            //{
-            //    bestBuy.driver.FindElement(By.CssSelector(".cart-label")).Click();
-            //}
-            //catch (Exception)
-            //{
-            //    //.c-modal-window.email-submission-modal.active
-            //    bestBuy.driver.FindElement(By.CssSelector(".size-l.c-overlay-fullscreen-is-open")).Click(); // so this happened because the modal view came up in chrome in best buy.
-            //    bestBuy.driver.FindElement(By.CssSelector(".cart-label")).Click();
-            //}
-            //// a good idea would be to get the screenshot of the opage before clicking trhe button? or actually probably best to click cart?
-
-            //EmailSender em = new EmailSender();
-            //em.SendGPUAlertEmail("https://www.bestbuy.com/site/gigabyte-nvidia-geforce-rtx-3080-eagle-oc-10gb-gddr6x-pci-express-4-0-graphics-card/6430621.p?skuId=6430621");
-
-            tempBestBuyBotsRemainingToDelegate -= 1;
-     }
+        }
+        bbScalpers.Add(bestBuy);
+        tasks.Add(Task.Run(async () => await bestBuy.GetGpu()));
+        string test = "test";
+        tempBestBuyBotsRemainingToDelegate -= 1;
         tempBestBuyBotsRemainingToDelegate = bestBuyBotsPerLink; // ok, now reset so the next lnik will have success
     }
 
-    for (int i = 0; i < bbScalpers.Count - 1; i++) // clean up current chromes before restarting
+    for (int i = 0; i <= bbScalpers.Count - 1; i++) // clean up current chromes before restarting
     {
         bbScalpers[i].driver.Close();
         bbScalpers[i].driver.Dispose();
@@ -182,6 +151,36 @@ static async void StartScalper(string[] args)
     //    tempNeweggBotsRemainingToDelegate = neweggBotsPerLink;
     //}
 
-        Console.ReadLine();
+}
 
+async Task DoTheGPUThing(int gpuListNumber)
+{
+    // do the gpu scalp thing.
+    BestBuyScalper bestBuy = new BestBuyScalper();
+    bestBuy.passedEmailAddressForNewCartNotifications = emailAddressForNewCartNotifications;
+    bestBuy.passedEmailPassForNewCartNotifications = emailPassForNewCartNotifications;
+    bestBuy.driver = new ChromeDriver();
+    try
+    {
+        bestBuy.driver.Navigate().GoToUrl(bestBuyLinks[gpuListNumber]);
+    }
+    catch (Exception)
+    {
+        Thread.Sleep(3500);
+        // im having really annyoing DNS_PROBE_FINISHED_NXDOMAIN issues so i am just going to let it try again. remove this for ur machine most likely fine for u.
+        try
+        {
+            bestBuy.driver.Navigate().GoToUrl(bestBuyLinks[gpuListNumber]);
+
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+    bbScalpers.Add(bestBuy);
+    tasks.Add(Task.Run(async () => await bestBuy.GetGpu()));
+    string test = "test";
+    tempBestBuyBotsRemainingToDelegate -= 1;
+    tempBestBuyBotsRemainingToDelegate = bestBuyBotsPerLink; // ok, now reset so the next lnik will have success
 }

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GPUScalper": {
+      "commandName": "Project",
+      "commandLineArgs": "REPLACEME@gmail.com PASSWORDREPLACEMEREDACTED"
+    }
+  }
+}
