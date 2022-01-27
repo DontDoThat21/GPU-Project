@@ -22,11 +22,15 @@ namespace GPUScalper
 
             try { 
                 // try to click the add to cart button
-                this.driver.FindElement(By.CssSelector(".c-button.c-button-primary.c-button-lg.c-button-block.c-button-icon.c-button-icon-leading.add-to-cart-button")).Click();
+               this.driver.FindElement(By.CssSelector(".c-button.c-button-primary.c-button-lg.c-button-block.c-button-icon.c-button-icon-leading.add-to-cart-button")).Click();
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                if (ex.Message == "")
+                {
+                    return;
+                }
                 Thread.Sleep(1000); // possible it didnt load yet; try again one more time
                 try
                 {
@@ -45,18 +49,27 @@ namespace GPUScalper
             {
                 this.driver.FindElement(By.CssSelector(".cart-label")).Click();
             }
-            catch (Exception)
+            catch (Exception exO)
             {
-                //.c-modal-window.email-submission-modal.active
-                this.driver.FindElement(By.CssSelector(".size-l.c-overlay-fullscreen-is-open")).Click(); // so this happened because the modal view came up in chrome in best buy.
-                this.driver.FindElement(By.CssSelector(".cart-label")).Click();
+                try
+                {
+                    //.c-modal-window.email-submission-modal.active
+                    this.driver.FindElement(By.CssSelector(".size-l.c-overlay-fullscreen-is-open")).Click(); // so this happened because the modal view came up in chrome in best buy.
+                    this.driver.FindElement(By.CssSelector(".cart-label")).Click();
+                }
+                catch (Exception exI)
+                {
+                    string msg = exI.Message;
+                    // no idea when this would fail? should i maybe check for the bot detector?
+                }
+                
             }
             // a good idea would be to get the screenshot of the opage before clicking trhe button? or actually probably best to click cart?
 
             EmailSender em = new EmailSender();
             em.passedSenderEmailAddressForNewCartNotifications = passedEmailAddressForNewCartNotifications;
             em.passedSenderEmailPassForNewCartNotifications = passedEmailPassForNewCartNotifications;
-            em.SendGPUAlertEmail("https://www.bestbuy.com/site/gigabyte-nvidia-geforce-rtx-3080-eagle-oc-10gb-gddr6x-pci-express-4-0-graphics-card/6430621.p?skuId=6430621");
+            em.SendGPUAlertEmail(this.driver.Url);
 
             //tempBestBuyBotsRemainingToDelegate -= 1;
         }
