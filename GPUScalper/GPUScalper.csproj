@@ -13,6 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="CartScreenshots\2022-01-26 20_53_25-Window.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="LinksToSearch\BestBuy1 - Copy.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

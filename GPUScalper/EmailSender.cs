@@ -13,7 +13,7 @@ namespace GPUScalper
         public string passedSenderEmailAddressForNewCartNotifications = "";
         public string passedSenderEmailPassForNewCartNotifications = "";
 
-        public void SendGPUAlertEmail(string url)
+        public void SendGPUAlertEmail(string url, Attachment screenShot)
         {
             try
             {
@@ -23,7 +23,9 @@ namespace GPUScalper
                 message.To.Add(new MailAddress("tylortrub@gmail.com"));
                 message.Subject = "GPU Auto-Scalper";
                 message.IsBodyHtml = true; //to make message body as html  
-                message.Body = $"SCALPER FOUND A GPU AND HAS ADDED IT TO THE CART AT {DateTime.Now}; Go get it!";
+                message.Body = $"SCALPER FOUND A GPU AND HAS ADDED IT TO THE CART AT {DateTime.Now}; Go get it!{Environment.NewLine + Environment.NewLine}" +
+                    $"GPU Link: {url}." + $"{Environment.NewLine}Good luck!";
+                message.Attachments.Add(screenShot);
                 smtp.Port = 587;
                 smtp.Host = "smtp.gmail.com"; //for gmail host  
                 smtp.EnableSsl = true;
