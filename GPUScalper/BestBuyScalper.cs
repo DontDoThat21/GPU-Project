@@ -90,7 +90,6 @@ namespace GPUScalper
             string ssSavedPath = $"CartScreenshots\\screenshot-cart-{now}.png";
             ss.SaveAsFile(ssSavedPath, ScreenshotImageFormat.Png);
             cartAddedScreenShots.Add(new Tuple<Screenshot, string>(ss, ssSavedPath));
-
             return ssBytes;
 
 
