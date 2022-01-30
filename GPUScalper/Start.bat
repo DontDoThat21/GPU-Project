@@ -1,0 +1,1 @@
+﻿GPUScalper.exe USERNAME@gmail.com password
