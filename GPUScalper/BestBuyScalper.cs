@@ -33,13 +33,25 @@ namespace GPUScalper
                     return;
                 }
                 Thread.Sleep(1000); // possible it didnt load yet; try again one more time
+
+                try // going to try to kill the survery menu/bot detection? menu after a refresh
+                {
+                    this.driver.FindElement(By.CssSelector("#survey_invite_no")).Click(); // tested and works; closes the annoying survery popup that would make the bot slower
+                    //string x = "yea";
+                }
+                catch
+                {
+                    Console.WriteLine(Environment.NewLine + "Couldn't find survey.");
+                    // dont care if didnt exist then continue
+                }
+
                 try
                 {
                     this.driver.FindElement(By.CssSelector(".c-button.c-button-primary.c-button-lg.c-button-block.c-button-icon.c-button-icon-leading.add-to-cart-button")).Click();
 
                 }
                 catch (Exception)
-                {
+                {                    
                     this.driver.Navigate().GoToUrl(this.driver.Url);
                     await GetGpu();
                 }
