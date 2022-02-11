@@ -10,18 +10,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
-
-delegate bool EventHandler(CtrlType sig);
-
-enum CtrlType
-{
-    CTRL_C_EVENT = 0,
-    CTRL_BREAK_EVENT = 1,
-    CTRL_CLOSE_EVENT = 2,
-    CTRL_LOGOFF_EVENT = 5,
-    CTRL_SHUTDOWN_EVENT = 6
-}
 namespace GPUScalper
 {
 
@@ -31,6 +21,16 @@ namespace GPUScalper
         [DllImport("Kernel32")]
         static extern bool SetConsoleCtrlHandler(EventHandler handler, bool add);
 
+        delegate bool EventHandler(CtrlType sig);
+
+        enum CtrlType
+        {
+            CTRL_C_EVENT = 0,
+            CTRL_BREAK_EVENT = 1,
+            CTRL_CLOSE_EVENT = 2,
+            CTRL_LOGOFF_EVENT = 5,
+            CTRL_SHUTDOWN_EVENT = 6
+        }
 
         static List<string> bestBuyLinks;
         static List<string> bnhLinks;
@@ -53,25 +53,36 @@ namespace GPUScalper
             switch (sig)
             {
                 case CtrlType.CTRL_C_EVENT:
+                    Process.Start(System.AppDomain.CurrentDomain.FriendlyName);
+                    Environment.Exit(-1);
+                    return true;
+                case CtrlType.CTRL_CLOSE_EVENT:
+                    Process.Start(System.AppDomain.CurrentDomain.FriendlyName);
+                    Environment.Exit(-1);
+                    return true;
                 case CtrlType.CTRL_LOGOFF_EVENT:
                 case CtrlType.CTRL_SHUTDOWN_EVENT:
-                case CtrlType.CTRL_CLOSE_EVENT:
+
                 default:
                     return false;
             }
+
+            
         }
 
         static async Task Main(string[] args)
         {
-            
+
+            _applicationCrashedHandler += new EventHandler(ApplicationCrashedHandler);
+            SetConsoleCtrlHandler(_applicationCrashedHandler, true);
+
             SetupLinks();
             GetEmailCredentials(args);
+            DisposeScalpers();
             SetupScalpers();
             ShowConsoleWelcomer();
             
             await StartScalper(args);
-            _applicationCrashedHandler += new EventHandler(ApplicationCrashedHandler);
-            SetConsoleCtrlHandler(_applicationCrashedHandler, true);
             // CLEAN UP ALL CHROME SESSIONS
             // DisposeDetachedChromeApps();
         }
@@ -79,17 +90,25 @@ namespace GPUScalper
 
         static void SetupScalpers()
         {
-            for (int i = 0; i <= (bestBuyLinks.Count - 1); i++)
+            try
             {
-                //await DoTheGPUThing(i);
-                // do the gpu scalp thing.
-                BestBuyScalper bestBuy = new BestBuyScalper();
-                bestBuy.passedEmailAddressForNewCartNotifications = emailAddressForNewCartNotifications;
-                bestBuy.passedEmailPassForNewCartNotifications = emailPassForNewCartNotifications;
-                bestBuy.driver = new ChromeDriver();
+                for (int i = 0; i <= (bestBuyLinks.Count - 1); i++)
+                {
+                    //await DoTheGPUThing(i);
+                    // do the gpu scalp thing.
+                    BestBuyScalper bestBuy = new BestBuyScalper();
+                    bestBuy.passedEmailAddressForNewCartNotifications = emailAddressForNewCartNotifications;
+                    bestBuy.passedEmailPassForNewCartNotifications = emailPassForNewCartNotifications;
+                    bestBuy.driver = new ChromeDriver();
 
-                bbScalpers.Add(bestBuy);
+                    bbScalpers.Add(bestBuy);
+                }
             }
+            catch(Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+            
         }
 
         /// <summary>
@@ -97,13 +116,39 @@ namespace GPUScalper
         /// </summary>
         static void DisposeScalpers()
         {
-            for (int i = 0; i <= (bbScalpers.Count - 1); i++)
+            try
             {
-                //await DoTheGPUThing(i);
-                bbScalpers[i].driver.Close();
-                bbScalpers[i].driver.Dispose();
+                for (int i = 0; i <= (bbScalpers.Count - 1); i++)
+                {
+                    //await DoTheGPUThing(i);
+                    bbScalpers[i].driver.Close();
+                    bbScalpers[i].driver.Dispose();
+                }
+                bbScalpers = new List<BestBuyScalper>();
+
+                // now get all proc == chrome
+                Process[] processList = Process.GetProcesses();
+
+                //List<Process> _runningChromeInstances = new List<Process>();
+
+                List<string> _runningInstancesWindowsTitles = processList.Select(mwt => mwt.MainWindowTitle).ToList();
+                List<Process> chromes = processList.Where(n => n.ProcessName.ToLower().Contains("chrome")).ToList();
+                foreach (Process p in chromes)
+                {
+                    //if (p.ProcessName.ToLower().Contains("chrome"))
+                    //{
+                    if (p.MainWindowTitle.ToLower().Contains("best buy") || p.MainWindowTitle.ToLower().Contains("data:,"))
+                    {
+                        p.Kill();
+                    }
+                    //}
+                }
             }
-            bbScalpers = new List<BestBuyScalper>();
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+            
         }
 
         static void SetupLinks()
@@ -156,35 +201,41 @@ namespace GPUScalper
 
         static async Task StartScalper(string[] args)
         {
-
-            //bestBuyBots = 50;// '' bestBuyLinks.Count; //1 per for now 50; // how many bots to run at once
-
-
-            for (int i = 0; i <= (bestBuyLinks.Count - 1); i++)
+            try
             {
-                await DoTheGPUThing(i);
+                //bestBuyBots = 50;// '' bestBuyLinks.Count; //1 per for now 50; // how many bots to run at once
 
-                try
+                for (int i = 0; i <= (bestBuyLinks.Count - 1); i++)
                 {
-                    bbScalpers[i].driver.Navigate().GoToUrl(bestBuyLinks[i]);
-                }
-                catch (Exception ex1)
-                {
-                    Thread.Sleep(3500);
-                    // im having really annyoing DNS_PROBE_FINISHED_NXDOMAIN issues so i am just going to let it try again. remove this for ur machine most likely fine for u.
+                    await DoTheGPUThing(i);
+
                     try
                     {
                         bbScalpers[i].driver.Navigate().GoToUrl(bestBuyLinks[i]);
-
                     }
-                    catch (Exception ex2)
+                    catch (Exception ex1)
                     {
-                        throw ex2;
-                    }
-                }
+                        Thread.Sleep(3500);
+                        // im having really annyoing DNS_PROBE_FINISHED_NXDOMAIN issues so i am just going to let it try again. remove this for ur machine most likely fine for u.
+                        try
+                        {
+                            bbScalpers[i].driver.Navigate().GoToUrl(bestBuyLinks[i]);
 
+                        }
+                        catch (Exception ex2)
+                        {
+                            throw ex2;
+                        }
+                    }
+
+                }
+                StartScalper(args);
             }
-            StartScalper(args);
+            catch (Exception ex)
+            {
+                Console.WriteLine($"A serious error occurred when trying to start the Scalper again. Error: {ex.Message + ex.StackTrace}");
+                // close this app now.
+            }
 
         }
 

@@ -38,11 +38,13 @@ namespace GPUScalper
                 try // going to try to kill the survery menu/bot detection? menu after a refresh
                 {
                     this.driver.FindElement(By.CssSelector("#survey_invite_no")).Click(); // tested and works; closes the annoying survery popup that would make the bot slower
-                    //string x = "yea";
+                                                                                          //string x = "yea";
+                    Console.WriteLine(Environment.NewLine + "Found a clicked a survey.");
+
                 }
                 catch
                 {
-                    Console.WriteLine(Environment.NewLine + "Couldn't find survey.");
+                    //Console.WriteLine(Environment.NewLine + "Couldn't find survey.");
                     // dont care if didnt exist then continue
                 }
 
